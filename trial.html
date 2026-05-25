@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Delivery Lookup System</title>
+
+<style>
+
+body {
+  font-family: Arial;
+  background: #f4f4f4;
+  padding: 20px;
+}
+
+.container {
+  max-width: 650px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #ccc;
+}
+
+h2 {
+  text-align: center;
+}
+
+select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+#areaInput {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  background: #e8f5e9;
+  border-left: 5px solid green;
+  font-weight: bold;
+}
+
+/* ADD THIS HERE */
+.logo-banner{
+  width:100%;
+  height:220px;
+  background:url('logo.png') center center no-repeat;
+  background-size:contain;
+  margin-bottom:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo-banner"></div>
+
+<select id="city" onchange="loadAreas()">
+  <option value="">Select City</option>
+</select>
+
+<input type="text" id="areaInput" placeholder="Search Area..." oninput="filterAreas()" style="display:none;">
+  
+<div id="areaList" style="
+  border:1px solid #ccc;
+  max-height:200px;
+  overflow-y:auto;
+  background:white;
+"></div>
+
+<div class="result" id="result">Delivery Branch will appear here</div>
+
+</div>
+
+<script>
+    
+// ================= FULL DATA =================
+const data = [
+
+/* ================= Al Ain ================= */
+{ city:"Al Ain", area:"Ain Al Fayda", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Ameriah", branch:"Sama" },
+{ city:"Al Ain", area:"Aqabiya (Iqabiyyah)", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Asharij", branch:"Sama" },
+{ city:"Al Ain", area:"Basra", branch:"Sama" },
+{ city:"Al Ain", area:"Bateen (Al-Ain)", branch:"Salamat" },
+{ city:"Al Ain", area:"Beda Bn Ammar", branch:"Sama" },
+{ city:"Al Ain", area:"Central District", branch:"Sama" },
+{ city:"Al Ain", area:"Dhaher (Daher)", branch:"Noud" },
+{ city:"Al Ain", area:"Falaj Hazaa", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Foaa (Fouah)", branch:"Sama" },
+{ city:"Al Ain", area:"Ghenaima (Ghnaymah)", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Hili", branch:"Sama" },
+{ city:"Al Ain", area:"Industrial Area", branch:"Sama" },
+{ city:"Al Ain", area:"Jabal Hafeet", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Jahili", branch:"Sama" },
+{ city:"Al Ain", area:"Jimi", branch:"Sama" },
+{ city:"Al Ain", area:"Khabisi", branch:"Sama" },
+{ city:"Al Ain", area:"Khaldiya (Al-Ain)", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Kuwaitat", branch:"Sama" },
+{ city:"Al Ain", area:"Manaseer", branch:"Sama" },
+{ city:"Al Ain", area:"Maqam", branch:"Salamat" },
+{ city:"Al Ain", area:"Markhaniyya", branch:"Sama" },
+{ city:"Al Ain", area:"Manazef", branch:"Sama" },
+{ city:"Al Ain", area:"Masoudi", branch:"Sama" },
+{ city:"Al Ain", area:"Mazyad (Mezyed)", branch:"Noud" },
+{ city:"Al Ain", area:"Meryal", branch:"Sama" },
+{ city:"Al Ain", area:"Misbah (Mesbah)", branch:"Sama" },
+{ city:"Al Ain", area:"Mnaizlah", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Mraijeb", branch:"Sama" },
+{ city:"Al Ain", area:"Mubazzara", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Murabaa", branch:"Sama" },
+{ city:"Al Ain", area:"Mutarid", branch:"Sama" },
+{ city:"Al Ain", area:"Mutawaa", branch:"Sama" },
+{ city:"Al Ain", area:"Muwaiji", branch:"Sama" },
+{ city:"Al Ain", area:"Neima (Nimah)", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Neyadat", branch:"Sama" },
+{ city:"Al Ain", area:"Noud", branch:"Noud" },
+{ city:"Al Ain", area:"Qattara", branch:"Sama" },
+{ city:"Al Ain", area:"Rawdah Al-Sharqiya", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Reef", branch:"Sama" },
+{ city:"Al Ain", area:"Saad", branch:"Salamat" },
+{ city:"Al Ain", area:"Salamat", branch:"Salamat" },
+{ city:"Al Ain", area:"Sarouj (Sarooj)", branch:"Noud" },
+{ city:"Al Ain", area:"Senaiya (Sanaiya)", branch:"Sama" },
+{ city:"Al Ain", area:"Shabahat", branch:"Noud" },
+{ city:"Al Ain", area:"Shiaab Al Ashkhar (Shiaab)", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Shuaibah", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Tawam Hospital", branch:"Salamat" },
+{ city:"Al Ain", area:"Towayya (Tiwayya)", branch:"Sama" },
+{ city:"Al Ain", area:"Um Ghafa", branch:"Noud" },
+{ city:"Al Ain", area:"Watah (Shubat Alwatah)", branch:"Falaj 2" },
+{ city:"Al Ain", area:"Yahar North (Al-Amrah / Al-Aamerah)", branch:"Salamat" },
+{ city:"Al Ain", area:"Yahar South (Aliah)", branch:"Salamat" },
+{ city:"Al Ain", area:"Zakher", branch:"Falaj 2" },
+
+/* ================= ABU DHABI ================= */
+{ city:"Abu Dhabi", area:"AbuDhabi Airport", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"AbuDhabi Industrial City", branch:"Rabdan 2 (AD)" },
+{ city:"Abu Dhabi", area:"Al-Danah", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Dhannah", branch:"Ruwais 2 (AD)" },
+{ city:"Abu Dhabi", area:"Al-Falah", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Al-Hisn", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Kasir", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Kheeran", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Al-Lissaily", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Maarid", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Al-Manhal", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Marina", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Maryah Island", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Mizn", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Al-Moazaz", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Al-Muneera", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Muntazah", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Al-Mushrif (Golf club side)", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Mushrif (Mushrif mall side)", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Al-Muzoun", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Al-Nahyan", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Qurm (Gurm)", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Al-Raha", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Ras Al-Akhdar", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Rawdah (Rowdhat)", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Al-Razeen", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Reef", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Reem Island", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Al-Rumaila", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Riyad", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Al-Saadah", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Al-Seef", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Shaleela", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Shamkha", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Al-Shawamekh", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Al-Thurayyah", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Al-Zahiyah", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Bain Al Jesrain (Bin Al Jesreen)", branch:"Rabdan 2 (AD)" },
+{ city:"Abu Dhabi", area:"Baniyas", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Bateen (AbuDhabi)", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Bawabat AbuDhabi", branch:"Rabdan 2 (AD)" },
+{ city:"Abu Dhabi", area:"Bawabat Al-Sharq", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Corniche", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Eastern Mangrove (Al-Garm)", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Hadbat Zafaranah", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Khaldiya (AbuDhabi)", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Khalifa city", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Khor Al-Maqtaa", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Madinat Al-Riyad", branch:"Riyad city (AD)" },
+{ city:"Abu Dhabi", area:"Masdar city", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Mohammed Bin Zayed (MBZ)", branch:"Rabdan 2 (AD)" },
+{ city:"Abu Dhabi", area:"Musaffah", branch:"Rabdan 2 (AD)" },
+{ city:"Abu Dhabi", area:"Qasr Al Bahr", branch:"Adnoc (AD)" },
+{ city:"Abu Dhabi", area:"Rabdan", branch:"Rabdan 2 (AD)" },
+{ city:"Abu Dhabi", area:"Ruwais", branch:"Ruwais 2 (AD)" },
+{ city:"Abu Dhabi", area:"Sas Al-Nakhl", branch:"Rabdan 2 (AD)" },
+{ city:"Abu Dhabi", area:"Shakhbout city", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Sheikh ZayedGrand Mousqe area", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Yas Island", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Zafaranah", branch:"Danat (AD)" },
+{ city:"Abu Dhabi", area:"Zayed city", branch:"Al-Zeina (AD)" },
+{ city:"Abu Dhabi", area:"Zayed International Airport", branch:"Al-Zeina (AD)" },
+
+/* ================= DUBAI ================= */
+{ city:"Dubai", area:"Abu Hail", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Academic city", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Al-Bada", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Baraha", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Barari", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Al-Baraha (First, Second & Third)", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Barsha South (First, Second, Third, Fourth & Fifth)", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Al-Fahidi", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Furjan", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Al-Garhoud", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Hamriya", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Hamriya Port", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Hebiah", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Al-Hudaiba", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Jadaf", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Jafiliya", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Karama", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Khabaisi", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Khawaneej (1,2)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Kheeran", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Kifaf", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Kouz Industrial Third", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Mankhool", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Merkadh", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Mina", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Mizhar (First, Second, Third & Fourth)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Muraqqabat", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Murar", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Muteena", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Nahda (First & Second)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Quoz", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Qouz Ind. (First, Second, Third & Fourth)", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Qusais (1,2)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Qusais Industrial area", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Raffa", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Rashidiya", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Reem", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Al-Rigga", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Safa (1,2)", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Satwa", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Shindagha", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Souq Al-Kabeer", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Thanya (Second, Third, Fourth, Fifth)", branch:"Damac Hills (DXB)" },  
+{ city:"Dubai", area:"Al-Twar (1,2,3,4,5)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Warqa (1,2,3,4,5)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Al-Wasl", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Wuheida", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Al-Yalayis (1 & 2)", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Arabian Ranches", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Arjan", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Bu Kadra", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Burj Khalifa", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Business Bay", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Cedre Villas", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"City of Arabia", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Commercial Area", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Corniche Deira", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Damac Hills", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Deira", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"DIFC", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Discovery Gardens", branch:"Damac Hills (DXB)" },       
+{ city:"Dubai", area:"DownTown Dubai", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Dubai Design District", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Dubai Festival City", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Dubai Healthcare city", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Dubai Hills Mall", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Dubai International Airport", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Dubai International City", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Dubai Investment Park", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Dubai Motor city", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Dubai Production city", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Dubai Residence Complex", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Dubai Silicon Oasis", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Dubai Sports city", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Dubai Studio city", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Emirates Hills", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Etihad Mall", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Falconcity of Wonders", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Ghadeer Al-Tair", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Ghoroob", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Global Village", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Golf city", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Green Community Village", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Hadaeq Sheikh Mohamed Bin Rashed", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Hor Al-Anz", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Industrial Area", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"International City Phase 2", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Jebel Ali (Jabal Ali)", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Jumeirah (1,2,3)", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Jumeirah Islands", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Jumeirah Lakes Towers", branch:"Damac Hills (DXB)" },  
+{ city:"Dubai", area:"Jumeirah Park", branch:"Damac Hills (DXB)" }, 
+{ city:"Dubai", area:"Jumeirah Village Circle", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Jumeirah Village Triangle", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Legends", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Liwan", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Madinat Dubai Al-Melaheyah", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Majan", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Marsa Al-Khor", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Meaisam", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Mirdif", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Mudon", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Muhaisnah (1,2,3,4)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Nad Al-Sheba 1", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Nad Al-Sheba 2", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Nad Al-Sheba 3", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Nad Al-Sheba 4", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Nadd Al-Hamar (Nad Alhamar)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Nadd Hessa (Nad Hessa)", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Nadd Shamma (Nad Shamma)", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Oud Al-Muteena", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Oud Metha", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Port Saeed", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Ras Al-Khor", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Ras Al-Khor Industrial area", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Remraam", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Riggat Al-Buteen", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Saheel", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Shorooq", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"The Centro", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"The Fields", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"The Gardens", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"The Greens", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"The Sustainable city", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"The Villa", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Tilal Al Ghaf", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Town Square", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Trade Center (First & Second)", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Um Hurair (First & Second)", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Um Suqueim (1,2,3)", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Umm Al-Sheif", branch:"SZR (DXB)" },
+{ city:"Dubai", area:"Umm Ramool", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Villanova", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Wadi Al-Safa 2", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Wadi Al-Safa 3", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Wadi Al-Safa 4 (City of Arabia side)", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Wadi Al-Safa 4 (Global Village side)", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Wadi Al-Safa 5 (The Villa side)", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Wadi Al Safa 5 (Arabian Ranches 3 side)", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Wadi Al-Safa 6", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Wadi Al-Safa 7", branch:"Damac Hills (DXB)" },
+{ city:"Dubai", area:"Warsan First", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Warsan Second", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Warsan Third", branch:"Nad Al Hamar (DXB)" },
+{ city:"Dubai", area:"Warsan Fourth", branch:"Souq Extra (DXB)" },
+{ city:"Dubai", area:"Zaabeel (First & Second)", branch:"SZR (DXB)" },
+
+/* ================= All Areas (including Remote area) ================= */
+{ city:"All Areas (including Remote area)", area:"Ain Al Fayda", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Ameriah", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Aqabiya (Iqabiyyah)", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Asharij", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Basra", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Bateen (Al-Ain)", branch:"Salamat" },
+{ city:"All Areas (including Remote area)", area:"Beda Bn Ammar", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Central District", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Dhaher (Daher)", branch:"Noud" },
+{ city:"All Areas (including Remote area)", area:"Falaj Hazaa", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Foaa (Fouah)", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Ghenaima (Ghnaymah)", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Hili", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Industrial Area", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Jabal Hafeet", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Jahili", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Jimi", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Khabisi", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Khaldiya (Al-Ain)", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Kuwaitat", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Manaseer", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Maqam", branch:"Salamat" },
+{ city:"All Areas (including Remote area)", area:"Markhaniyya", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Manazef", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Masoudi", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Mazyad (Mezyed)", branch:"Noud" },
+{ city:"All Areas (including Remote area)", area:"Meryal", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Misbah (Mesbah)", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Mnaizlah", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Mraijeb", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Mubazzara", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Murabaa", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Mutarid", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Mutawaa", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Muwaiji", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Neima (Nimah)", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Neyadat", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Noud", branch:"Noud" },
+{ city:"All Areas (including Remote area)", area:"Qattara", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Rawdah Al-Sharqiya", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Reef", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Saad", branch:"Salamat" },
+{ city:"All Areas (including Remote area)", area:"Salamat", branch:"Salamat" },
+{ city:"All Areas (including Remote area)", area:"Sarouj (Sarooj)", branch:"Noud" },
+{ city:"All Areas (including Remote area)", area:"Senaiya (Sanaiya)", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Shabahat", branch:"Noud" },
+{ city:"All Areas (including Remote area)", area:"Shiaab Al Ashkhar (Shiaab)", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Shuaibah", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Tawam Hospital", branch:"Salamat" },
+{ city:"All Areas (including Remote area)", area:"Towayya (Tiwayya)", branch:"Sama" },
+{ city:"All Areas (including Remote area)", area:"Um Ghafa", branch:"Noud" },
+{ city:"All Areas (including Remote area)", area:"Watah (Shubat Alwatah)", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"Yahar North (Al-Amrah / Al-Aamerah)", branch:"Salamat" },
+{ city:"All Areas (including Remote area)", area:"Yahar South (Aliah)", branch:"Salamat" },
+{ city:"All Areas (including Remote area)", area:"Zakher", branch:"Falaj 2" },
+{ city:"All Areas (including Remote area)", area:"AbuDhabi Airport", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"AbuDhabi Industrial City", branch:"Rabdan 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Danah", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Dhannah", branch:"Ruwais 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Falah", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Hisn", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Kasir", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Kheeran", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Lissaily", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Maarid", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Manhal", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Marina", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Maryah Island", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Mizn", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Moazaz", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Muneera", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Muntazah", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Mushrif (Golf club side)", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Mushrif (Mushrif mall side)", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Muzoun", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Nahyan", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Qurm (Gurm)", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Raha", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Ras Al-Akhdar", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Rawdah (Rowdhat)", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Razeen", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Reef", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Reem Island", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Rumaila", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Riyad", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Saadah", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Seef", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Shaleela", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Shamkha", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Shawamekh", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Thurayyah", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Al-Zahiyah", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Bain Al Jesrain (Bin Al Jesreen)", branch:"Rabdan 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Baniyas", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Bateen (AbuDhabi)", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Bawabat AbuDhabi", branch:"Rabdan 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Bawabat Al-Sharq", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Corniche", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Eastern Mangrove (Al-Garm)", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Hadbat Zafaranah", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Khaldiya (AbuDhabi)", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Khalifa city", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Khor Al-Maqtaa", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Madinat Al-Riyad", branch:"Riyad city (AD)" },
+{ city:"All Areas (including Remote area)", area:"Masdar city", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Mohammed Bin Zayed (MBZ)", branch:"Rabdan 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Musaffah", branch:"Rabdan 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Qasr Al Bahr", branch:"Adnoc (AD)" },
+{ city:"All Areas (including Remote area)", area:"Rabdan", branch:"Rabdan 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Ruwais", branch:"Ruwais 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Sas Al-Nakhl", branch:"Rabdan 2 (AD)" },
+{ city:"All Areas (including Remote area)", area:"Shakhbout city", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Sheikh ZayedGrand Mousqe area", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Yas Island", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Zafaranah", branch:"Danat (AD)" },
+{ city:"All Areas (including Remote area)", area:"Zayed city", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Zayed International Airport", branch:"Al-Zeina (AD)" },
+{ city:"All Areas (including Remote area)", area:"Abu Hail", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Academic city", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Bada", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Baraha", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Barari", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Baraha (First, Second & Third)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Barsha South (First, Second, Third, Fourth & Fifth)", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Fahidi", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Furjan", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Garhoud", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Hamriya", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Hamriya Port", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Hebiah", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Hudaiba", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Jadaf", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Jafiliya", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Karama", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Khabaisi (DXB)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Khawaneej (1,2)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Kheeran", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Kifaf", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Kouz Industrial Third", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Mankhool", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Merkadh", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Mina", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Mizhar (First, Second, Third & Fourth)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Muraqqabat", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Murar", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Muteena", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Nahda (First & Second)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Quoz", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Qouz Ind. (First, Second, Third & Fourth)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Qusais (1,2)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Qusais Industrial area", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Raffa", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Rashidiya", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Reem", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Rigga", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Safa (1,2)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Satwa", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Shindagha", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Souq Al-Kabeer", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Thanya (Second, Third, Fourth, Fifth)", branch:"Damac Hills (DXB)" },  
+{ city:"All Areas (including Remote area)", area:"Al-Twar (1,2,3,4,5)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Warqa (1,2,3,4,5)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Wasl", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Wuheida", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Al-Yalayis (1 & 2)", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Arabian Ranches", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Arjan", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Bu Kadra", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Burj Khalifa", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Business Bay", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Cedre Villas", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"City of Arabia", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Commercial Area", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Corniche Deira", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Damac Hills", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Deira", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"DIFC", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Discovery Gardens", branch:"Damac Hills (DXB)" },     
+{ city:"All Areas (including Remote area)", area:"DownTown Dubai", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Design District", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Festival City", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Healthcare city", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Hills Mall", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai International Airport", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai International City", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Investment Park", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Motor city", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Production city", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Residence Complex", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Silicon Oasis", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Sports city", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Dubai Studio city", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Emirates Hills", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Etihad Mall", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Falconcity of Wonders", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Ghadeer Al-Tair", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Ghoroob", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Global Village", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Golf city", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Green Community Village", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Hadaeq Sheikh Mohamed Bin Rashed", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Hor Al-Anz", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Industrial Area", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"International City Phase 2", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Jebel Ali (Jabal Ali)", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Jumeirah (1,2,3)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Jumeirah Islands", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Jumeirah Lakes Towers", branch:"Damac Hills (DXB)" },  
+{ city:"All Areas (including Remote area)", area:"Jumeirah Park", branch:"Damac Hills (DXB)" },   
+{ city:"All Areas (including Remote area)", area:"Jumeirah Village Circle", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Jumeirah Village Triangle", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Legends", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Liwan", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Madinat Dubai Al-Melaheyah", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Majan", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Marsa Al-Khor", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Meaisam", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Mirdif", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Mudon", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Muhaisnah (1,2,3,4)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Nad Al-Sheba 1", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Nad Al-Sheba 2", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Nad Al-Sheba 3", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Nad Al-Sheba 4", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Nadd Al-Hamar (Nad Alhamar)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Nadd Hessa (Nad Hessa)", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Nadd Shamma (Nad Shamma)", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Oud Al-Muteena", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Oud Metha", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Port Saeed", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Ras Al-Khor", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Ras Al-Khor Industrial area", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Remraam", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Riggat Al-Buteen", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Saheel", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Shorooq", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"The Centro", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"The Fields", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"The Gardens", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"The Greens", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"The Sustainable city", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"The Villa", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Tilal Al Ghaf", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Town Square", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Trade Center (First & Second)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Um Hurair (First & Second)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Um Suqueim (1,2,3)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Umm Al-Sheif", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Umm Ramool", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Villanova", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Wadi Al-Safa 2", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Wadi Al-Safa 3", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Wadi Al-Safa 4 (City of Arabia side)", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Wadi Al-Safa 4 (Global Village side)", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Wadi Al-Safa 5 (The Villa side)", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Wadi Al Safa 5 (Arabian Ranches 3 side)", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Wadi Al-Safa 6", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Wadi Al-Safa 7", branch:"Damac Hills (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Warsan First", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Warsan Second", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Warsan Third", branch:"Nad Al Hamar (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Warsan Fourth", branch:"Souq Extra (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Zaabeel (First & Second)", branch:"SZR (DXB)" },
+{ city:"All Areas (including Remote area)", area:"Ghayathi (Ghiyathi)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday & Thursday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Bad Al-Mutawah (Bad Al-Matawah)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday & Thursday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Yaw Al-Nadhara (Al-Nadra)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday & Thursday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Al-Hamra (beside Al-Hamra Airport)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday & Thursday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Barakah", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday & Thursday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Al-Sila", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday & Thursday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Madinat Zayed", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Habshan", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Baynounah city", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Liwa (Bateen Liwa)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Asab", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Al-Azeezah", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Hameem", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Al-Mirfa (Al-Marfa)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Wednesday & Saturday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Abu Al-Abyad island (Abo)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Wednesday & Saturday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Hatta (DXB)", branch:"<span style='color:red'>Jeebly</span>y - Delivery on Monday, Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Lehbab (Lahbab)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday, Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Masfut (AJM)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday, Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Showka (RAK)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday, Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Nazwah (DXB)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday, Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Madam (SHJ)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Monday, Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Nahil (Nahel)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Sweihan", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Dahra", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Nabagh (Nabah)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"Malaqit", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"ِAl-Qou (Al-Quaa)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"ِAl-Wiqan (Al-Wagan)", branch:"<span style='color:red'>Jeebly</span> - Delivery on Tuesday & Friday [Remote area]" },
+{ city:"All Areas (including Remote area)", area:"ِSharjah (SHJ)", branch:"<span style='color:red'>Jeebly</span>" },
+{ city:"All Areas (including Remote area)", area:"ِAjman (AJM)", branch:"<span style='color:red'>Jeebly</span>" },
+{ city:"All Areas (including Remote area)", area:"ِRas AlKhayma (RAK)", branch:"<span style='color:red'>Jeebly</span>" },
+{ city:"All Areas (including Remote area)", area:"ِUmm AlQuwain", branch:"<span style='color:red'>Jeebly</span>" },
+{ city:"All Areas (including Remote area)", area:"ِAl-Khazna", branch:"<span style='color:red'>Jeebly</span>" },
+{ city:"All Areas (including Remote area)", area:"ِRemah", branch:"<span style='color:red'>Jeebly</span>" },
+{ city:"All Areas (including Remote area)", area:"ِAl-Fagaa (Al-Faqaa)", branch:"<span style='color:red'>Jeebly</span>" },
+{ city:"All Areas (including Remote area)", area:"ِAl-Samhah", branch:"<span style='color:red'>Jeebly</span>" }
+ 
+];
+
+// ================= INIT =================
+const citySelect = document.getElementById("city");
+const areaInput = document.getElementById("areaInput");
+const areaList = document.getElementById("areaList");
+const result = document.getElementById("result");
+
+if (typeof data === "undefined") {
+  console.error("DATA is missing");
+} else {
+  const cities = [...new Set(data.map(d => d.city))];
+
+  cities.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    citySelect.appendChild(opt);
+  });
+}
+
+function getAreas(city) {
+  return [...new Set(
+    data.filter(d => d.city === city).map(d => d.area)
+  )];
+}
+  
+function showAllAreas() {
+  const city = citySelect.value;
+
+  areaList.innerHTML = "";
+
+  if (!city) {
+    areaList.innerHTML =
+      "<div style='padding:10px;color:red'>Please select a city first</div>";
+    return;
+  }
+
+  const areas = getAreas(city);
+
+  currentFiltered = areas;
+  selectedIndex = -1;
+
+  areas.forEach((area, index) => {
+    const div = document.createElement("div");
+    div.textContent = area;
+
+    div.style.padding = "10px";
+    div.style.cursor = "pointer";
+    div.style.borderBottom = "1px solid #eee";
+
+    div.onclick = () => selectArea(area);
+
+    div.onmouseenter = () => {
+      selectedIndex = index;
+      updateHighlight();
+    };
+
+    areaList.appendChild(div);
+  });
+
+  updateHighlight();
+}
+  
+areaInput.addEventListener("focus", () => {
+  areaInput.value = "";   // optional reset
+  showAllAreas();         // ALWAYS show full list
+});
+
+areaInput.addEventListener("click", () => {
+  showAllAreas();         // important for mouse click
+});
+
+document.addEventListener("click", function (e) {
+  const isClickInside =
+    areaInput.contains(e.target) ||
+    areaList.contains(e.target);
+
+  if (!isClickInside) {
+    areaList.innerHTML = "";
+  }
+});
+  
+function loadAreas() {
+  const city = citySelect.value;
+
+  if (city) {
+    areaInput.style.display = "block";
+    areaInput.focus(); // 👈 IMPORTANT: forces UI to appear active
+    areaInput.value = ""; // reset input
+    areaList.innerHTML = ""; // clear old list
+
+    result.innerHTML = "Delivery Branch will appear here";
+  } else {
+    areaInput.style.display = "none";
+    areaList.innerHTML = "";
+    result.innerHTML = "Delivery Branch will appear here";
+  }
+}
+  
+let currentFiltered = [];
+let selectedIndex = -1;
+  
+areaInput.addEventListener("keydown", function(e) {
+
+  if (!currentFiltered.length) return;
+
+  // ↓ DOWN
+  if (e.key === "ArrowDown") {
+    selectedIndex++;
+    if (selectedIndex >= currentFiltered.length) {
+      selectedIndex = 0;
+    }
+    updateHighlight();
+    e.preventDefault();
+  }
+
+  // ↑ UP
+  else if (e.key === "ArrowUp") {
+    selectedIndex--;
+    if (selectedIndex < 0) {
+      selectedIndex = currentFiltered.length - 1;
+    }
+    updateHighlight();
+    e.preventDefault();
+  }
+
+  // ENTER
+  else if (e.key === "Enter") {
+    if (selectedIndex >= 0) {
+      selectArea(currentFiltered[selectedIndex]);
+      e.preventDefault();
+    }
+  }
+});
+  
+// ================= LOAD AREAS =================
+function selectArea(area) {
+  const city = citySelect.value;
+
+  areaInput.value = area;
+  areaList.innerHTML = "";
+
+  const found = data.find(
+    d => d.city === city && d.area === area
+  );
+
+  result.innerHTML = found
+    ? "Delivery Branch: " + found.branch
+    : "Not found";
+}
+
+function updateHighlight() {
+
+  const items = areaList.querySelectorAll("div");
+
+  items.forEach((item, i) => {
+
+    item.style.background =
+      (i === selectedIndex) ? "#e3f2fd" : "white";
+
+    // auto scroll selected item into view
+    if (i === selectedIndex) {
+      item.scrollIntoView({
+        block: "nearest"
+      });
+    }
+  });
+}
+ 
+// ================= SHOW BRANCH =================
+function filterAreas() {
+
+  const city = citySelect.value;
+  const input = areaInput.value.trim().toLowerCase();
+
+  areaList.innerHTML = "";
+
+if (!city) return;
+
+const areas = getAreas(city);
+  
+  currentFiltered = input
+    ? areas.filter(a => a.toLowerCase().includes(input))
+    : areas;
+
+  selectedIndex = -1;
+
+  if (currentFiltered.length === 0) {
+    areaList.innerHTML = "<div style='padding:10px'>No results</div>";
+    return;
+  }
+
+  currentFiltered.forEach((area, index) => {
+
+    const div = document.createElement("div");
+    div.textContent = area;
+
+    div.style.padding = "10px";
+    div.style.cursor = "pointer";
+    div.style.borderBottom = "1px solid #eee";
+
+    // mouse click
+    div.onclick = () => selectArea(area);
+
+    // hover sync
+    div.onmouseenter = () => {
+      selectedIndex = index;
+      updateHighlight();
+    };
+
+    areaList.appendChild(div);
+  });
+
+  updateHighlight();
+}
+  
+</script>
+
+</body>
+</html>	
