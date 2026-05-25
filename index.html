@@ -805,28 +805,24 @@ function selectArea(area) {
     d => d.city === city && d.area === area
   );
 
-  if (found) {
+ if (found) {
 
-    result.innerHTML =
-      "Delivery Branch: " + found.branch;
+  result.innerHTML =
+    "Delivery Branch: " + found.branch;
 
-    document.getElementById("mapContainer").style.display = "block";
+  const selectedArea = found.area;
 
-    const selectedArea = found.area;
+  const mapFrame =
+    document.getElementById("coverageMap");
 
-    const mapFrame =
-      document.getElementById("coverageMap");
+ mapFrame.src =
+  "https://www.google.com/maps/d/embed?mid=11m8cDm7JggyoEfq3ZYWcdvnYLf1R1gk&hl=en";
 
-    mapFrame.src =
-  "https://www.google.com/maps?q="
-  + encodeURIComponent(selectedArea + ", UAE")
-  + "&output=embed";
+} else {
 
-  } else {
+  result.innerHTML = "Not found";
 
-    result.innerHTML = "Not found";
-
-  }
+}
 
 }
 
