@@ -827,8 +827,9 @@ function selectArea(area) {
       document.getElementById("coverageMap");
 
     mapFrame.src =
-      "https://www.google.com/maps/d/embed?mid=11m8cDm7JggyoEfq3ZYWcdvnYLf1R1gk&hl=en&q="
-      + encodeURIComponent(selectedArea);
+  "https://www.google.com/maps?q="
+  + encodeURIComponent(selectedArea + ", UAE")
+  + "&output=embed";
 
   } else {
 
