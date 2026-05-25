@@ -71,18 +71,26 @@ select {
 </select>
 
 <input type="text" id="areaInput" placeholder="Search Area..." oninput="filterAreas()" style="display:none;">
+
+<div id="areaList"></div>  
   
-<div id="areaList" style="
-  border:1px solid #ccc;
-  max-height:200px;
-  overflow-y:auto;
-  background:white;
-"></div>
-
-<div class="result" id="result">Delivery Branch will appear here</div>
-
+<div class="result" id="result">
+  Delivery Branch will appear here
 </div>
 
+<div id="mapContainer" style="margin-top:20px;">
+
+  <iframe
+    id="coverageMap"
+    width="100%"
+    height="500"
+    style="border:2px solid #ccc; border-radius:10px;"
+    loading="lazy"
+    allowfullscreen>
+  </iframe>
+
+</div>
+  
 <script>
     
 // ================= FULL DATA =================
@@ -796,6 +804,7 @@ areaInput.addEventListener("keydown", function(e) {
   
 // ================= LOAD AREAS =================
 function selectArea(area) {
+
   const city = citySelect.value;
 
   areaInput.value = area;
@@ -805,9 +814,28 @@ function selectArea(area) {
     d => d.city === city && d.area === area
   );
 
-  result.innerHTML = found
-    ? "Delivery Branch: " + found.branch
-    : "Not found";
+  if (found) {
+
+    result.innerHTML =
+      "Delivery Branch: " + found.branch;
+
+    document.getElementById("mapContainer").style.display = "block";
+
+    const selectedArea = found.area;
+
+    const mapFrame =
+      document.getElementById("coverageMap");
+
+    mapFrame.src =
+      "https://www.google.com/maps/d/embed?mid=11m8cDm7JggyoEfq3ZYWcdvnYLf1R1gk&hl=en&q="
+      + encodeURIComponent(selectedArea);
+
+  } else {
+
+    result.innerHTML = "Not found";
+
+  }
+
 }
 
 function updateHighlight() {
